@@ -1,69 +1,65 @@
-# React + TypeScript + Vite
+# Overview
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a simple map viewer application built with React, TypeScript, and Leaflet. It allows users to view and toggle different GeoJSON layers on an interactive map. The application currently displays parks and roads data for a section of New York City.
 
-Currently, two official plugins are available:
+The project demonstrates:
+- Integration of Leaflet maps in a React application
+- Working with GeoJSON data
+- Layer management and visibility toggling
+- TypeScript for type safety
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+{Provide a link to your YouTube demonstration. It should be a one minute demo of the software running and a walkthrough of the code.}
 
-## Expanding the ESLint configuration
+[Software Demo Video](https://www.youtube.com/watch?v=z6tOF3Upmsw)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Development Environment
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+To work with this project, you'll need:
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Node.js (latest LTS version recommended)
+- npm or yarn package manager
+- A modern web browser
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The project uses the following technologies:
+- React 19
+- TypeScript
+- Vite (for fast development and building)
+- Leaflet (for interactive maps)
+- ESLint (for code quality)
+
+# Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+3. Start the development server:
+```bash
+npm run dev
+```
+4. Open your browser and navigate to the URL shown in the terminal (typically http://localhost:5173)
+
+# Building for Production
+
+To create a production build:
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The built files will be in the `dist` directory and can be deployed to any static hosting service.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# Project Structure
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- `src/components/` - React components including Map and LayerControl
+- `src/data/` - GeoJSON data files for parks and roads
+- `src/types/` - TypeScript type definitions
+- `src/utils/` - Utility functions for working with GeoJSON and Leaflet
+
+# Useful Websites
+
+* [React Documentation](https://react.dev/)
+* [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+* [Leaflet Documentation](https://leafletjs.com/reference.html)
+* [GeoJSON Specification](https://geojson.org/)
+* [Vite Documentation](https://vitejs.dev/guide/)
