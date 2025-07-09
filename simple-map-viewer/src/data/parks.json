@@ -1,0 +1,110 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Central Park",
+        "description": "A large urban park in the heart of the city",
+        "color": "#4CAF50"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.981, 40.768],
+            [-73.973, 40.768],
+            [-73.973, 40.800],
+            [-73.958, 40.800],
+            [-73.958, 40.764],
+            [-73.981, 40.764],
+            [-73.981, 40.768]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Riverside Park",
+        "description": "A scenic park along the river",
+        "color": "#8BC34A"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.990, 40.800],
+            [-73.980, 40.800],
+            [-73.980, 40.825],
+            [-73.975, 40.825],
+            [-73.975, 40.835],
+            [-73.968, 40.835],
+            [-73.968, 40.800],
+            [-73.990, 40.800]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Washington Square Park",
+        "description": "A historic park with a famous arch",
+        "color": "#CDDC39"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9985, 40.7305],
+            [-73.9985, 40.7320],
+            [-73.9965, 40.7320],
+            [-73.9965, 40.7305],
+            [-73.9985, 40.7305]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bryant Park",
+        "description": "A small urban park behind the New York Public Library",
+        "color": "#66BB6A"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.9845, 40.7535],
+            [-73.9845, 40.7545],
+            [-73.9825, 40.7545],
+            [-73.9825, 40.7535],
+            [-73.9845, 40.7535]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Battery Park",
+        "description": "A park at the southern tip of Manhattan",
+        "color": "#81C784"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-74.0175, 40.7030],
+            [-74.0175, 40.7050],
+            [-74.0145, 40.7050],
+            [-74.0145, 40.7030],
+            [-74.0175, 40.7030]
+          ]
+        ]
+      }
+    }
+  ]
+}
