@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Expense Summary - Personal Expense Tracker</title>
+</head>
+<body>
+    <section>
+        <h2 class="mb-4">Expense Summary</h2>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Expense Summary by Category</h5>
+                        <span class="badge bg-primary" th:text="${'Total: $' + #numbers.formatDecimal(totalExpenses, 1, 2)}">$0.00</span>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${categorySummary.empty}" class="alert alert-info">
+                            No expense data available. Start by adding some expenses!
+                        </div>
+                        
+                        <div th:unless="${categorySummary.empty}">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Total Amount</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="summary : ${categorySummary}">
+                                        <td th:text="${summary[1]}">Category Name</td>
+                                        <td th:text="${'$' + #numbers.formatDecimal(summary[2], 1, 2)}">$0.00</td>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     th:style="'width: ' + ${(summary[2] / totalExpenses) * 100} + '%'" 
+                                                     th:text="${#numbers.formatDecimal((summary[2] / totalExpenses) * 100, 1, 1) + '%'}">
+                                                    0%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="mt-4">
+                                <h5>Visualization</h5>
+                                <div class="progress" style="height: 30px;">
+                                    <div th:each="summary, iterStat : ${categorySummary}" 
+                                         class="progress-bar" 
+                                         th:classappend="${'bg-' + (#arrays.contains({'primary', 'success', 'info', 'warning', 'danger'}, iterStat.index % 5) ? #arrays.get({'primary', 'success', 'info', 'warning', 'danger'}, iterStat.index % 5) : 'secondary')}"
+                                         role="progressbar" 
+                                         th:style="'width: ' + ${(summary[2] / totalExpenses) * 100} + '%'" 
+                                         th:text="${summary[1]}">
+                                        Category
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tips for Better Expense Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Track Everything:</strong> Record all expenses, no matter how small, to get an accurate picture of your spending habits.
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Categorize Properly:</strong> Use specific categories to better understand where your money is going.
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Review Regularly:</strong> Check your expense summary weekly or monthly to identify trends and areas for improvement.
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Set Budgets:</strong> Based on your spending patterns, set realistic budgets for each category.
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Look for Patterns:</strong> Identify recurring expenses that might be reduced or eliminated.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+            <a href="/expenses" class="btn btn-primary">Manage Expenses</a>
+            <a href="/categories" class="btn btn-secondary">Manage Categories</a>
+        </div>
+    </section>
+</body>
+</html>

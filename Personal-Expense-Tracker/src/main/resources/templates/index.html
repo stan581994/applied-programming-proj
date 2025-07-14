@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Dashboard - Personal Expense Tracker</title>
+</head>
+<body>
+    <section>
+        <h2 class="mb-4">Dashboard</h2>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Expenses</h5>
+                        <h2 class="card-text text-primary" th:text="${'$' + #numbers.formatDecimal(totalExpenses, 1, 2)}">$0.00</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Expenses</h5>
+                        <h2 class="card-text text-success" th:text="${expenseCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Categories</h5>
+                        <h2 class="card-text text-info" th:text="${categoryCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Expense Summary by Category</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${categorySummary.empty}" class="alert alert-info">
+                            No expense data available. Start by adding some expenses!
+                        </div>
+                        
+                        <table th:unless="${categorySummary.empty}" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="summary : ${categorySummary}">
+                                    <td th:text="${summary[1]}">Category Name</td>
+                                    <td th:text="${'$' + #numbers.formatDecimal(summary[2], 1, 2)}">$0.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/expenses" class="btn btn-primary">Manage Expenses</a>
+                            <a href="/categories" class="btn btn-secondary">Manage Categories</a>
+                            <a href="/expenses/summary" class="btn btn-info">View Summary</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Create categories to organize your expenses</li>
+                            <li class="list-group-item">Track your daily expenses to see where your money goes</li>
+                            <li class="list-group-item">Use the summary view to analyze your spending habits</li>
+                            <li class="list-group-item">Filter expenses by date range to track spending over time</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
