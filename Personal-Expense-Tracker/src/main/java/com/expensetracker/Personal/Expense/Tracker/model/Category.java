@@ -1,6 +1,5 @@
-package com.expensetracker.Personal.Expense.Tracker.model;
+package com.expensetracker.Personal.Expense.Tracker;
 
-import com.expensetracker.Personal.Expense.Tracker.Expense;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
