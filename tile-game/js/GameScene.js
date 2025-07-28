@@ -269,4 +269,7 @@ class GameScene extends Phaser.Scene {
             backgroundColor: '#000',
             padding: { x: 10, y: 5 }
         });
-        restartText.set
+        restartText.setOrigin(0.5);
+        restartText.setScrollFactor(0); // Keep it fixed on screen
+    }
+}

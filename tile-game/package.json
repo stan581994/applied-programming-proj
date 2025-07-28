@@ -1,0 +1,36 @@
+{
+  "name": "2d-tile-adventure-game",
+  "version": "1.0.0",
+  "description": "A complete 2D tile-based game built with Phaser.js - perfect for learning game development in JavaScript",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . --live",
+    "serve": "python -m http.server 8000"
+  },
+  "keywords": [
+    "game",
+    "phaser",
+    "javascript",
+    "2d",
+    "tiles",
+    "browser-game",
+    "html5",
+    "canvas"
+  ],
+  "author": "Game Developer",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/2d-tile-adventure-game.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/2d-tile-adventure-game/issues"
+  },
+  "homepage": "https://github.com/yourusername/2d-tile-adventure-game#readme"
+}
