@@ -4,16 +4,38 @@ class GameScene extends Phaser.Scene {
         this.player = null;
         this.cursors = null;
         this.wasd = null;
+        this.spaceKey = null;
         this.coins = null;
         this.obstacles = null;
         this.score = 0;
         this.scoreText = null;
         this.gameMap = null;
         this.groundLayer = null;
+        
+        // Attack combo system
+        this.isAttacking = false;
+        this.comboCount = 0;
+        this.comboTimer = null;
+        this.comboWindow = 1000; // 1 second window for combo
+        
+        // Health system
+        this.maxHealth = 3;
+        this.currentHealth = 3;
+        this.hearts = [];
+        this.isInvulnerable = false;
+        this.invulnerabilityTime = 2000; // 2 seconds of invulnerability after taking damage
+        this.isDead = false;
+        this.gameOver = false;
     }
 
     preload() {
-        // Create better sprites programmatically
+        // Load adventurer sprite sheet
+        this.load.spritesheet('adventurer', 'characters/Adventurer/adventurer-Sheet.png', {
+            frameWidth: 50,  // Each frame is 50px wide
+            frameHeight: 37  // Each frame is 37px tall
+        });
+        
+        // Create other sprites programmatically
         this.createSprites();
     }
 
@@ -24,16 +46,6 @@ class GameScene extends Phaser.Scene {
         groundGraphics.fillRect(0, 0, 32, 32);
         groundGraphics.generateTexture('ground', 32, 32);
         groundGraphics.destroy();
-
-        // Create player sprite
-        const playerGraphics = this.add.graphics();
-        playerGraphics.fillStyle(0x0066CC); // Blue
-        playerGraphics.fillRect(4, 4, 24, 24);
-        playerGraphics.fillStyle(0xFFFFFF); // White eyes
-        playerGraphics.fillRect(8, 8, 4, 4);
-        playerGraphics.fillRect(20, 8, 4, 4);
-        playerGraphics.generateTexture('player', 32, 32);
-        playerGraphics.destroy();
 
         // Create coin sprite
         const coinGraphics = this.add.graphics();
@@ -65,20 +77,106 @@ class GameScene extends Phaser.Scene {
         grassGraphics.fillRect(25, 25, 4, 4);
         grassGraphics.generateTexture('grass', 32, 32);
         grassGraphics.destroy();
+
+        // Create heart sprite
+        const heartGraphics = this.add.graphics();
+        heartGraphics.fillStyle(0xFF1744); // Red heart
+        // Draw heart shape
+        heartGraphics.fillCircle(8, 8, 6);
+        heartGraphics.fillCircle(16, 8, 6);
+        heartGraphics.fillTriangle(2, 12, 22, 12, 12, 24);
+        heartGraphics.generateTexture('heart', 24, 24);
+        heartGraphics.destroy();
+
+        // Create empty heart sprite
+        const emptyHeartGraphics = this.add.graphics();
+        emptyHeartGraphics.lineStyle(2, 0xFF1744);
+        emptyHeartGraphics.strokeCircle(8, 8, 6);
+        emptyHeartGraphics.strokeCircle(16, 8, 6);
+        emptyHeartGraphics.strokeTriangle(2, 12, 22, 12, 12, 24);
+        emptyHeartGraphics.generateTexture('emptyHeart', 24, 24);
+        emptyHeartGraphics.destroy();
+    }
+
+    createAnimations() {
+        // Create idle animation
+        this.anims.create({
+            key: 'idle',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 0, end: 3 }),
+            frameRate: 8,
+            repeat: -1
+        });
+
+        // Create run animation
+        this.anims.create({
+            key: 'run',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 8, end: 13 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // Create hurt animation
+        this.anims.create({
+            key: 'hurt',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 59, end: 61 }),
+            frameRate: 10,
+            repeat: 0
+        });
+
+        // Create death animation
+        this.anims.create({
+            key: 'die',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 62, end: 68 }),
+            frameRate: 8,
+            repeat: 0
+        });
+
+        // Create attack animations
+        this.anims.create({
+            key: 'attack1',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 42, end: 46 }),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'attack2',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 47, end: 52 }),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'attack3',
+            frames: this.anims.generateFrameNumbers('adventurer', { start: 53, end: 58 }),
+            frameRate: 15,
+            repeat: 0
+        });
     }
 
     create() {
         // Create tile map
         this.createTileMap();
         
-        // Create player
-        this.player = this.physics.add.sprite(64, 64, 'player');
+        // Create animations for the adventurer
+        this.createAnimations();
+        
+        // Create player with adventurer sprite
+        this.player = this.physics.add.sprite(64, 64, 'adventurer');
         this.player.setCollideWorldBounds(true);
-        this.player.body.setSize(24, 24, 4, 4); // Adjust collision box
+        this.player.body.setSize(30, 35, 10, 2); // Adjust collision box for adventurer sprite
+        this.player.setScale(1.2); // Make the adventurer a bit larger
+        
+        // Start with idle animation
+        this.player.play('idle');
 
         // Create input controls
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        
+        // Set up space key event for attack combo
+        this.spaceKey.on('down', this.handleAttack, this);
 
         // Create coins group
         this.coins = this.physics.add.group();
@@ -99,6 +197,9 @@ class GameScene extends Phaser.Scene {
             backgroundColor: '#fff',
             padding: { x: 10, y: 5 }
         });
+
+        // Create health UI
+        this.createHealthUI();
 
         // Set camera to follow player
         this.cameras.main.startFollow(this.player);
@@ -197,25 +298,291 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
+        // Don't allow movement during attack animations or when dead/game over
+        if (this.isAttacking || this.isDead || this.gameOver) {
+            this.player.setVelocity(0);
+            return;
+        }
+
         // Player movement
         const speed = 160;
         
         // Reset velocity
         this.player.setVelocity(0);
+        
+        // Track if player is moving
+        let isMoving = false;
 
         // Horizontal movement
         if (this.cursors.left.isDown || this.wasd.A.isDown) {
             this.player.setVelocityX(-speed);
+            this.player.setFlipX(true); // Flip sprite to face left
+            isMoving = true;
         } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
             this.player.setVelocityX(speed);
+            this.player.setFlipX(false); // Face right (normal direction)
+            isMoving = true;
         }
 
         // Vertical movement
         if (this.cursors.up.isDown || this.wasd.W.isDown) {
             this.player.setVelocityY(-speed);
+            isMoving = true;
         } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
             this.player.setVelocityY(speed);
+            isMoving = true;
         }
+
+        // Play appropriate animation (only if not attacking)
+        if (isMoving) {
+            // Only start run animation if not already playing it
+            if (this.player.anims.currentAnim?.key !== 'run') {
+                this.player.play('run');
+            }
+        } else {
+            // Only start idle animation if not already playing it
+            if (this.player.anims.currentAnim?.key !== 'idle') {
+                this.player.play('idle');
+            }
+        }
+    }
+
+    handleAttack() {
+        // Don't allow new attacks while already attacking
+        if (this.isAttacking) {
+            return;
+        }
+
+        // Increment combo count
+        this.comboCount++;
+        
+        // Clear existing combo timer
+        if (this.comboTimer) {
+            this.comboTimer.remove();
+        }
+
+        // Set attacking state
+        this.isAttacking = true;
+
+        // Determine which attack animation to play
+        let attackKey;
+        if (this.comboCount === 1) {
+            attackKey = 'attack1';
+        } else if (this.comboCount === 2) {
+            attackKey = 'attack2';
+        } else if (this.comboCount >= 3) {
+            attackKey = 'attack3';
+            // Reset combo after the third attack
+            this.comboCount = 0;
+        }
+
+        // Play the attack animation
+        this.player.play(attackKey);
+
+        // Set up animation complete listener
+        this.player.once(`animationcomplete-${attackKey}`, () => {
+            this.isAttacking = false;
+            
+            // If this was the third attack, reset combo completely
+            if (attackKey === 'attack3') {
+                this.comboCount = 0;
+            } else {
+                // Start combo timer for next attack
+                this.comboTimer = this.time.delayedCall(this.comboWindow, () => {
+                    this.comboCount = 0; // Reset combo if no input within window
+                });
+            }
+            
+            // Return to idle animation
+            this.player.play('idle');
+        });
+
+        // Add visual feedback for combo
+        this.showComboFeedback();
+    }
+
+    showComboFeedback() {
+        // Create combo text
+        let comboText;
+        if (this.comboCount === 1) {
+            comboText = 'ATTACK!';
+        } else if (this.comboCount === 2) {
+            comboText = 'COMBO x2!';
+        } else if (this.comboCount === 3) {
+            comboText = 'COMBO x3!';
+        }
+
+        // Display combo feedback
+        const feedback = this.add.text(this.player.x, this.player.y - 50, comboText, {
+            fontSize: '16px',
+            fill: '#FF6B35',
+            fontStyle: 'bold'
+        });
+        feedback.setOrigin(0.5);
+
+        // Animate the feedback text
+        this.tweens.add({
+            targets: feedback,
+            y: feedback.y - 30,
+            alpha: 0,
+            duration: 800,
+            ease: 'Power2',
+            onComplete: () => {
+                feedback.destroy();
+            }
+        });
+    }
+
+    createHealthUI() {
+        // Create hearts display
+        for (let i = 0; i < this.maxHealth; i++) {
+            const heart = this.add.image(16 + (i * 32), 60, 'heart');
+            heart.setScrollFactor(0); // Keep hearts fixed on screen
+            heart.setScale(1.2);
+            this.hearts.push(heart);
+        }
+    }
+
+    updateHealthUI() {
+        // Update heart display based on current health
+        for (let i = 0; i < this.hearts.length; i++) {
+            if (i < this.currentHealth) {
+                this.hearts[i].setTexture('heart');
+            } else {
+                this.hearts[i].setTexture('emptyHeart');
+            }
+        }
+    }
+
+    takeDamage() {
+        // Don't take damage if already dead or invulnerable
+        if (this.isDead || this.isInvulnerable) {
+            return;
+        }
+
+        // Reduce health
+        this.currentHealth--;
+        this.updateHealthUI();
+
+        // Check if dead
+        if (this.currentHealth <= 0) {
+            this.playerDie();
+        } else {
+            // Set invulnerability period
+            this.isInvulnerable = true;
+            this.time.delayedCall(this.invulnerabilityTime, () => {
+                this.isInvulnerable = false;
+            });
+
+            // Visual feedback for invulnerability
+            this.tweens.add({
+                targets: this.player,
+                alpha: 0.5,
+                duration: 200,
+                yoyo: true,
+                repeat: 9, // Flash for 2 seconds
+                onComplete: () => {
+                    this.player.setAlpha(1);
+                }
+            });
+        }
+    }
+
+    playerDie() {
+        this.isDead = true;
+        this.isAttacking = false;
+        
+        // Stop player movement
+        this.player.setVelocity(0);
+        
+        // Play death animation
+        this.player.play('die');
+        
+        // Show game over after death animation
+        this.player.once('animationcomplete-die', () => {
+            this.showGameOver();
+        });
+    }
+
+    showGameOver() {
+        this.gameOver = true;
+        
+        // Create dark overlay
+        const overlay = this.add.graphics();
+        overlay.fillStyle(0x000000, 0.7);
+        overlay.fillRect(0, 0, 800, 600);
+        overlay.setScrollFactor(0);
+
+        // Game Over title
+        const gameOverText = this.add.text(400, 200, 'GAME OVER', {
+            fontSize: '48px',
+            fill: '#FF0000',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 4
+        });
+        gameOverText.setOrigin(0.5);
+        gameOverText.setScrollFactor(0);
+
+        // Subtitle
+        const subtitleText = this.add.text(400, 280, 'The adventure ends here...', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontStyle: 'italic'
+        });
+        subtitleText.setOrigin(0.5);
+        subtitleText.setScrollFactor(0);
+
+        // Score display
+        const finalScoreText = this.add.text(400, 340, `Final Score: ${this.score}`, {
+            fontSize: '28px',
+            fill: '#FFD700',
+            fontStyle: 'bold'
+        });
+        finalScoreText.setOrigin(0.5);
+        finalScoreText.setScrollFactor(0);
+
+        // Restart instruction
+        const restartText = this.add.text(400, 420, 'Press ANY KEY to restart your journey!', {
+            fontSize: '20px',
+            fill: '#00FF00',
+            fontStyle: 'bold'
+        });
+        restartText.setOrigin(0.5);
+        restartText.setScrollFactor(0);
+
+        // Add blinking effect to restart text
+        this.tweens.add({
+            targets: restartText,
+            alpha: 0.3,
+            duration: 800,
+            yoyo: true,
+            repeat: -1
+        });
+
+        // Set up restart functionality
+        this.input.keyboard.once('keydown', () => {
+            this.restartGame();
+        });
+    }
+
+    restartGame() {
+        // Reset all game state
+        this.currentHealth = this.maxHealth;
+        this.score = 0;
+        this.isDead = false;
+        this.gameOver = false;
+        this.isAttacking = false;
+        this.isInvulnerable = false;
+        this.comboCount = 0;
+        
+        // Clear any existing timers
+        if (this.comboTimer) {
+            this.comboTimer.remove();
+        }
+
+        // Restart the scene
+        this.scene.restart();
     }
 
     collectCoin(player, coin) {
@@ -231,6 +598,11 @@ class GameScene extends Phaser.Scene {
     }
 
     hitObstacle(player, obstacle) {
+        // Don't take damage if already dead or invulnerable
+        if (this.isDead || this.isInvulnerable) {
+            return;
+        }
+
         // Simple knockback effect
         const knockbackForce = 200;
         const angle = Phaser.Math.Angle.Between(obstacle.x, obstacle.y, player.x, player.y);
@@ -240,13 +612,17 @@ class GameScene extends Phaser.Scene {
             Math.sin(angle) * knockbackForce
         );
 
-        // Flash effect
-        this.tweens.add({
-            targets: player,
-            alpha: 0.5,
-            duration: 100,
-            yoyo: true,
-            repeat: 3
+        // Play hurt animation
+        player.play('hurt');
+
+        // Take damage
+        this.takeDamage();
+
+        // Return to idle after hurt animation completes
+        player.once('animationcomplete-hurt', () => {
+            if (!this.isDead) {
+                player.play('idle');
+            }
         });
     }
 
